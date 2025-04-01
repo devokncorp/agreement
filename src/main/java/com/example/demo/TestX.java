@@ -1,4 +1,3 @@
-
 package com.example.demo;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -70,14 +69,15 @@ public class TestX {
 //        log.debug("{}",(System.currentTimeMillis()-start));
     }
 
-    private <U> ConcurrentHashMap getIntegerPaymentConcurrentHashMap(List<U> entityList) {
-        return  entityList
+    private <U> ConcurrentHashMap<Integer, U> getIntegerPaymentConcurrentHashMap(List<U> entityList) {
+        return entityList
                 .parallelStream()
                 .collect(Collectors
-                        .toConcurrentMap(entity ->
-                                        entity.hashCode(),
-                                        Function.identity(),
-                                        (u, v) -> u,
-                                        () -> new ConcurrentHashMap(entityList.size())));
+                        .toConcurrentMap(
+                                entity -> entity.hashCode(),
+                                Function.identity(),
+                                (u, v) -> u,
+                                ConcurrentHashMap::new
+                        ));
     }
 }

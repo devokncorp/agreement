@@ -34,13 +34,11 @@ public class AService {
     }
     public List<Payment> hashMap() {
         List<Payment> DATA_A = new ArrayList<>();
-        ;
         List<Payment> DATA_B = new ArrayList<>();
-        ;
         f(DATA_A, DATA_B);
 
-        ConcurrentHashMap<Object, Payment> dataSetA = getMap(DATA_A);
-        ConcurrentHashMap<Object, Payment> dataSetB = getMap(DATA_B);
+        ConcurrentHashMap<Integer, Payment> dataSetA = getMap(DATA_A);
+        ConcurrentHashMap<Integer, Payment> dataSetB = getMap(DATA_B);
 
         List<Payment> agreement = dataSetA.keySet()
                 .parallelStream()
@@ -53,7 +51,8 @@ public class AService {
                 .parallelStream()
                 .filter(key -> dataSetA.get(key) == null)
                 .map(dataSetB::get)
-                .filter(Objects::nonNull).collect(Collectors.toList());
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
         return agreement;
     }
@@ -67,7 +66,7 @@ public class AService {
     }
 
 
-    private <V> ConcurrentHashMap getMap(List<V> entityList) {
+    private <V> ConcurrentHashMap<Integer, V> getMap(List<V> entityList) {
         return entityList
                 .parallelStream()
                 .collect(Collectors
@@ -78,9 +77,8 @@ public class AService {
                                     log.trace("" + u.hashCode());
                                     return u;
                                 },
-                                () -> new ConcurrentHashMap(entityList.size())
-                        )
-                );
+                                ConcurrentHashMap::new
+                        ));
     }
 
     public List<Payment> getegg() {
@@ -88,36 +86,16 @@ public class AService {
     }
 
     public List<Payment> parallelStream() {
-        long start = (System.currentTimeMillis());
+        long start = System.currentTimeMillis();
 
         List<Payment> DATA_A = new ArrayList<>();
-        ;
         List<Payment> DATA_B = new ArrayList<>();
-        ;
         f(DATA_A, DATA_B);
 
-        List<Payment> collect = DATA_A.parallelStream().filter(payment -> DATA_B.parallelStream().noneMatch(payment1 -> payment1.equals(payment))).collect(Collectors.toList());
-
-//        ForkJoinPool customThreadPool = new ForkJoinPool(4);
-//        try {
-//            ForkJoinTask<List<Payment>> submit = customThreadPool.submit(() -> {
-//                List<Payment> collect = DATA_A.parallelStream().filter(payment -> DATA_B.parallelStream().noneMatch(payment1 -> payment1.equals(payment))).collect(Collectors.toList());
-//
-//                System.out.println(collect.size() + " agreement count");
-//                return collect;
-//            });
-//
-//            List<Payment> payments = submit.get();
-//        } catch (InterruptedException e) {
-//            throw new RuntimeException(e);
-//        } catch (ExecutionException e) {
-//            throw new RuntimeException(e);
-//        }
-//        customThreadPool.shutdownNow();
-
-        long end = (System.currentTimeMillis());
-        System.out.println("paralelstream thread pool__" + (end - start));
-
+        List<Payment> collect = DATA_A.parallelStream()
+                .filter(payment -> DATA_B.parallelStream()
+                        .noneMatch(payment1 -> payment1.equals(payment)))
+                .collect(Collectors.toList());
 
         return collect;
     }
